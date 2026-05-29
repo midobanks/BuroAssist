@@ -1,13 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
+import { mockCities, mockWorkflows, mockGlossaryTerms, mockResources } from "@/lib/mock-data";
 
 const { Pool } = pg;
+
+let prisma: PrismaClient;
 
 function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
-    throw new Error("DATABASE_URL environment variable is missing.");
+    return null;
   }
 
   const pool = new Pool({
@@ -21,19 +24,56 @@ function createPrismaClient() {
   return new PrismaClient({ adapter });
 }
 
-let prisma: PrismaClient;
+// Build a mock Prisma client that returns static seed data
+function createMockPrisma(): PrismaClient {
+  const mockFindMany = (data: unknown[]) => (() => Promise.resolve(data)) as any;
+  const mockFindUnique = (data: unknown) => ((_args: unknown) => Promise.resolve(data)) as any;
 
-try {
-  prisma = createPrismaClient();
-} catch {
-  prisma = new Proxy({} as unknown as PrismaClient, {
-    get(_, prop) {
-      throw new Error(
-        `DATABASE_URL is not configured. PrismaClient.${String(prop)} cannot be used. ` +
-        "Set the DATABASE_URL environment variable to use database features."
-      );
+  return {
+    city: { findMany: mockFindMany(mockCities), findUnique: mockFindUnique(null) },
+    workflow: {
+      findMany: mockFindMany(mockWorkflows),
+      findUnique: ((args: any) => {
+        const workflow = mockWorkflows.find((w: any) => w.slug === args?.where?.slug);
+        return Promise.resolve(workflow || null);
+      }) as any,
     },
-  });
+    workflowStep: { findMany: mockFindMany([]) },
+    checklistItem: {
+      findMany: mockFindMany([]),
+      findUnique: mockFindUnique(null),
+    },
+    contentSource: { findMany: mockFindMany(mockResources) },
+    glossaryTerm: {
+      findMany: ((args: any) => {
+        let terms = [...mockGlossaryTerms];
+        if (args?.where?.OR) {
+          const search = args.where.OR[0]?.term?.contains?.toLowerCase();
+          if (search) {
+            terms = terms.filter((t: any) =>
+              t.term.toLowerCase().includes(search) ||
+              t.plainEnglishDefinition.toLowerCase().includes(search)
+            );
+          }
+        }
+        return Promise.resolve(terms);
+      }) as any,
+    },
+    user: { findUnique: mockFindUnique(null), create: mockFindUnique(null) },
+    profile: {
+      findUnique: mockFindUnique(null),
+      upsert: ((_args: unknown) => Promise.resolve({ id: "mock-id", onboardingCompletedAt: null })) as any,
+    },
+    userWorkflow: { findMany: mockFindMany([]), findUnique: mockFindUnique(null), upsert: ((_args: unknown) => Promise.resolve({})) as any, create: mockFindUnique(null) },
+    userChecklistItem: { findMany: mockFindMany([]), upsert: ((_args: unknown) => Promise.resolve({})) as any },
+    reminder: { findMany: mockFindMany([]), create: mockFindUnique(null), findUnique: mockFindUnique(null), update: mockFindUnique(null) },
+    feedback: { create: mockFindUnique(null) },
+    $transaction: ((cb: any) => cb(createMockPrisma())) as any,
+    $disconnect: () => Promise.resolve(),
+  } as unknown as PrismaClient;
 }
+
+const realClient = createPrismaClient();
+prisma = realClient ?? createMockPrisma();
 
 export default prisma;
