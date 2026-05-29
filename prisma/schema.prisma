@@ -1,0 +1,440 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// AUTHENTICATION MODELS (NextAuth / Auth.js)
+// ==========================================
+
+model User {
+  id            String    @id @default(uuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  role          String    @default("user") // "user" or "admin"
+  passwordHash  String?   @map("password_hash")
+
+  accounts           Account[]
+  sessions           Session[]
+  profile            Profile?
+  userWorkflows      UserWorkflow[]
+  userChecklistItems UserChecklistItem[]
+  reminders          Reminder[]
+  feedback           Feedback[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ==========================================
+// CORE BUSINESS DOMAIN MODELS
+// ==========================================
+
+enum NationalityGroup {
+  eu_eea
+  non_eu
+  unknown
+}
+
+enum CurrentStatus {
+  student
+  employee
+  skilled_worker
+  blue_card_candidate
+  job_seeker
+  freelancer
+  family_member
+  researcher
+  other
+  unknown
+}
+
+model Profile {
+  id                    String            @id // Matches user id
+  email                 String?
+  preferredLanguage     String            @default("en") @map("preferred_language")
+  cityId                String?           @map("city_id")
+  nationalityGroup      NationalityGroup? @map("nationality_group")
+  currentStatus         CurrentStatus?    @map("current_status")
+  arrivalDate           DateTime?         @map("arrival_date")
+  moveInDate            DateTime?         @map("move_in_date")
+  visaExpiryDate        DateTime?         @map("visa_expiry_date")
+  onboardingCompletedAt DateTime?         @map("onboarding_completed_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User  @relation(fields: [id], references: [id], onDelete: Cascade)
+  city City? @relation(fields: [cityId], references: [id])
+
+  @@map("profiles")
+}
+
+model City {
+  id           String   @id @default(uuid())
+  name         String
+  slug         String   @unique
+  federalState String?  @map("federal_state")
+  country      String   @default("Germany")
+  isMvpCity    Boolean  @default(true) @map("is_mvp_city")
+  isActive     Boolean  @default(true) @map("is_active")
+
+  profiles       Profile[]
+  workflowSteps  WorkflowStep[]
+  checklistItems ChecklistItem[]
+  contentSources ContentSource[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("cities")
+}
+
+enum WorkflowSlug {
+  anmeldung
+  residence_permit
+  health_insurance
+  tax_id_elster
+  mobile_sim
+  banking
+}
+
+enum RiskLevel {
+  low
+  medium
+  high
+}
+
+model Workflow {
+  id               String       @id @default(uuid())
+  slug             WorkflowSlug @unique
+  name             String
+  shortDescription String       @map("short_description")
+  longDescription  String       @map("long_description")
+  category         String
+  defaultOrder     Int          @map("default_order")
+  riskLevel        RiskLevel    @map("risk_level")
+  isActive         Boolean      @default(true) @map("is_active")
+  lastReviewedAt   DateTime?    @map("last_reviewed_at")
+
+  steps          WorkflowStep[]
+  checklistItems ChecklistItem[]
+  userWorkflows  UserWorkflow[]
+  reminders      Reminder[]
+  contentSources ContentSource[]
+  glossaryTerms  GlossaryTerm[]
+  feedback       Feedback[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("workflows")
+}
+
+model WorkflowStep {
+  id                         String    @id @default(uuid())
+  workflowId                 String    @map("workflow_id")
+  cityId                     String?   @map("city_id")
+  title                      String
+  description                String    @db.Text
+  stepOrder                  Int       @map("step_order")
+  appliesToStatuses          Json?     @map("applies_to_statuses") // Text array of CurrentStatus
+  appliesToNationalityGroups Json?     @map("applies_to_nationality_groups") // Text array of NationalityGroup
+  isRequired                 Boolean   @default(true) @map("is_required")
+  warningText                String?   @map("warning_text")
+  sourceId                   String?   @map("source_id")
+  lastReviewedAt             DateTime? @map("last_reviewed_at")
+
+  workflow       Workflow        @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  city           City?           @relation(fields: [cityId], references: [id])
+  source         ContentSource?  @relation(fields: [sourceId], references: [id])
+  checklistItems ChecklistItem[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("workflow_steps")
+}
+
+enum ChecklistItemType {
+  document
+  appointment
+  form
+  proof
+  account_setup
+  verification
+  reminder
+  information
+  other
+}
+
+enum Priority {
+  low
+  medium
+  high
+  urgent
+}
+
+model ChecklistItem {
+  id                         String            @id @default(uuid())
+  workflowId                 String            @map("workflow_id")
+  workflowStepId             String?           @map("workflow_step_id")
+  cityId                     String?           @map("city_id")
+  title                      String
+  description                String            @db.Text
+  itemType                   ChecklistItemType @map("item_type")
+  priority                   Priority
+  appliesToStatuses          Json?             @map("applies_to_statuses") // Text array of CurrentStatus
+  appliesToNationalityGroups Json?             @map("applies_to_nationality_groups") // Text array of NationalityGroup
+  isRequired                 Boolean           @default(true) @map("is_required")
+  sourceId                   String?           @map("source_id")
+  lastReviewedAt             DateTime?         @map("last_reviewed_at")
+
+  workflow           Workflow            @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflowStep       WorkflowStep?       @relation(fields: [workflowStepId], references: [id])
+  city               City?               @relation(fields: [cityId], references: [id])
+  source             ContentSource?      @relation(fields: [sourceId], references: [id])
+  userChecklistItems UserChecklistItem[]
+  reminders          Reminder[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("checklist_items")
+}
+
+enum WorkflowStatus {
+  not_started
+  in_progress
+  ready
+  completed
+  blocked
+  not_applicable
+}
+
+model UserWorkflow {
+  id                 String         @id @default(uuid())
+  userId             String         @map("user_id")
+  workflowId         String         @map("workflow_id")
+  status             WorkflowStatus @default(not_started)
+  progressPercentage Int            @default(0) @map("progress_percentage")
+  dueDate            DateTime?      @map("due_date")
+  startedAt          DateTime?      @map("started_at")
+  completedAt        DateTime?      @map("completed_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, workflowId])
+  @@map("user_workflows")
+}
+
+enum ChecklistStatus {
+  not_started
+  in_progress
+  completed
+  blocked
+  not_applicable
+}
+
+model UserChecklistItem {
+  id              String          @id @default(uuid())
+  userId          String          @map("user_id")
+  checklistItemId String          @map("checklist_item_id")
+  status          ChecklistStatus @default(not_started)
+  notes           String?         @db.Text
+  completedAt     DateTime?       @map("completed_at")
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checklistItem ChecklistItem @relation(fields: [checklistItemId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, checklistItemId])
+  @@map("user_checklist_items")
+}
+
+enum ReminderType {
+  deadline
+  appointment
+  document_follow_up
+  activation_code
+  renewal
+  custom
+}
+
+enum ReminderChannel {
+  email
+  in_app
+}
+
+enum ReminderStatus {
+  scheduled
+  sent
+  cancelled
+  failed
+}
+
+model Reminder {
+  id              String          @id @default(uuid())
+  userId          String          @map("user_id")
+  workflowId      String?         @map("workflow_id")
+  checklistItemId String?         @map("checklist_item_id")
+  title           String
+  description     String?         @db.Text
+  reminderType    ReminderType    @map("reminder_type")
+  reminderAt      DateTime        @map("reminder_at")
+  channel         ReminderChannel @default(email)
+  status          ReminderStatus  @default(scheduled)
+  sentAt          DateTime?       @map("sent_at")
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workflow      Workflow?      @relation(fields: [workflowId], references: [id])
+  checklistItem ChecklistItem? @relation(fields: [checklistItemId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("reminders")
+}
+
+enum SourceType {
+  official_government
+  official_provider
+  trusted_institution
+  internal_reviewed_content
+  other
+}
+
+model ContentSource {
+  id            String     @id @default(uuid())
+  title         String
+  url           String
+  sourceType    SourceType @map("source_type")
+  publisher     String?
+  cityId        String?    @map("city_id")
+  workflowId    String?    @map("workflow_id")
+  language      String     @default("de")
+  lastCheckedAt DateTime   @default(now()) @map("last_checked_at")
+
+  city          City?          @relation(fields: [cityId], references: [id])
+  workflow      Workflow?      @relation(fields: [workflowId], references: [id])
+  workflowSteps WorkflowStep[]
+  checklistItems ChecklistItem[]
+  glossaryTerms GlossaryTerm[]
+  feedback      Feedback[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("content_sources")
+}
+
+model GlossaryTerm {
+  id                     String  @id @default(uuid())
+  term                   String
+  slug                   String  @unique
+  plainEnglishDefinition String  @map("plain_english_definition") @db.Text
+  germanDefinition       String? @map("german_definition") @db.Text
+  workflowId             String? @map("workflow_id")
+  sourceId               String? @map("source_id")
+
+  workflow Workflow?      @relation(fields: [workflowId], references: [id])
+  source   ContentSource? @relation(fields: [sourceId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("glossary_terms")
+}
+
+enum FeedbackType {
+  content_error
+  missing_information
+  confusing_step
+  product_feedback
+  feature_request
+}
+
+enum FeedbackStatus {
+  new
+  reviewing
+  resolved
+  dismissed
+}
+
+model Feedback {
+  id              String         @id @default(uuid())
+  userId          String?        @map("user_id")
+  feedbackType    FeedbackType   @map("feedback_type")
+  workflowId      String?        @map("workflow_id")
+  contentSourceId String?        @map("content_source_id")
+  message         String         @db.Text
+  rating          Int?
+  status          FeedbackStatus @default(new)
+
+  user     User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workflow Workflow?      @relation(fields: [workflowId], references: [id])
+  source   ContentSource? @relation(fields: [contentSourceId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("feedback")
+}
