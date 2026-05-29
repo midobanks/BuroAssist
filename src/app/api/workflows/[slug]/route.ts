@@ -35,7 +35,7 @@ export async function GET(
     }
 
     const session = await auth();
-    let userWorkflow = null;
+    let userWorkflow: any = null;
     const userChecklistItems: Record<string, string> = {};
 
     if (session?.user?.id) {

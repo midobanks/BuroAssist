@@ -54,8 +54,8 @@ export async function PATCH(
       where: { userId: session.user.id, checklistItem: { workflowId: checklistItem.workflowId } },
     });
 
-    const completedCount = userItems.filter((ui) => ui.status === "completed").length;
-    const totalRequired = allItems.filter((ci) => ci.isRequired).length;
+    const completedCount = userItems.filter((ui: any) => ui.status === "completed").length;
+    const totalRequired = allItems.filter((ci: any) => ci.isRequired).length;
     const progressPercentage = totalRequired > 0 ? Math.round((completedCount / totalRequired) * 100) : 0;
 
     const workflow = await prisma.workflow.findUnique({

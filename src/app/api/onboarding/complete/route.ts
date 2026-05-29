@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     const dbWorkflows = await prisma.workflow.findMany({ where: { isActive: true } });
     const roadmap = recommendations.map((rec) => {
-      const dbWf = dbWorkflows.find((w) => w.slug === rec.slug);
+      const dbWf = dbWorkflows.find((w: any) => w.slug === rec.slug);
       return {
         slug: rec.slug,
         name: dbWf?.name || rec.slug,
