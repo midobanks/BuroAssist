@@ -4,32 +4,36 @@ import pg from "pg";
 
 const { Pool } = pg;
 
-const prismaClientSingleton = () => {
+function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error("DATABASE_URL environment variable is missing.");
   }
-  
+
   const pool = new Pool({
     connectionString,
-    // Add reasonable connection pool settings for dev/serverless environments
     max: 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 5000,
   });
 
   const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
-};
-
-declare global {
-  var prismaGlobal: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
-const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
+let prisma: PrismaClient;
+
+try {
+  prisma = createPrismaClient();
+} catch {
+  prisma = new Proxy({} as unknown as PrismaClient, {
+    get(_, prop) {
+      throw new Error(
+        `DATABASE_URL is not configured. PrismaClient.${String(prop)} cannot be used. ` +
+        "Set the DATABASE_URL environment variable to use database features."
+      );
+    },
+  });
+}
 
 export default prisma;
-
-if (process.env.NODE_ENV !== "production") {
-  globalThis.prismaGlobal = prisma;
-}
