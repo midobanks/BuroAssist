@@ -243,8 +243,8 @@ export default function LandingPage() {
       {/* Main Content */}
       <main className="flex-1 max-w-content mx-auto px-4 py-12 md:py-20 flex flex-col space-y-24 md:space-y-32">
         {/* ── HERO ── */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="flex flex-col space-y-6 order-2 md:order-1">
+        <section className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-12 items-center">
+          <div className="flex flex-col space-y-6 order-2 md:order-1 md:col-span-3">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent-soft/60 border border-accent/10 text-xs font-semibold text-accent w-fit">
               <Sparkles className="h-3.5 w-3.5" />
               Your personalized relocation companion
@@ -258,7 +258,7 @@ export default function LandingPage() {
                 </svg>
               </span>
             </h1>
-            <p className="text-base md:text-lg text-text-secondary leading-relaxed max-w-[480px]">
+            <p className="text-base md:text-lg text-text-secondary leading-relaxed max-w-[540px]">
               Stop Googling &mdash; start doing. BüroAssist gives you a personalized, step-by-step plan for Anmeldung, banking, insurance, SIM, residence permit, and taxes. Built for expats, by people who&apos;ve been there.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -283,7 +283,7 @@ export default function LandingPage() {
               <span>Trusted by expats settling in Germany</span>
             </div>
           </div>
-          <div className="order-1 md:order-2">
+          <div className="order-1 md:order-2 md:col-span-2">
             <HeroIllustration />
           </div>
         </section>

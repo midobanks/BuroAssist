@@ -9,19 +9,13 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-    const host = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com";
 
-    if (key && typeof window !== "undefined" && !initializedRef.current) {
+    if (key && !initializedRef.current) {
       initializedRef.current = true;
       posthog.init(key, {
-        api_host: host,
+        api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
         person_profiles: "identified_only",
         capture_pageview: false,
-        loaded: (ph) => {
-          if (process.env.NODE_ENV !== "production") {
-            ph.debug();
-          }
-        },
       });
     }
   }, []);
