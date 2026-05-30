@@ -28,7 +28,22 @@ function createMockPrisma() {
         return Promise.resolve(terms);
       },
     },
-    user: { findUnique: promise(null), create: promise({}) },
+    user: {
+      findUnique: (args: any) => {
+        const email = args?.where?.email;
+        if (email) {
+          return Promise.resolve({
+            id: "demo-user-id",
+            name: "Demo User",
+            email,
+            passwordHash: "$2b$12$4yzbToVcnN/XdTPfOTUA1uuvhIHObaJPgi/RV4GjcHEH104Cy9LMq",
+            role: "user",
+          });
+        }
+        return Promise.resolve(null);
+      },
+      create: promise({ id: "demo-user-id", name: "", email: "" }),
+    },
     profile: { findUnique: promise(null), upsert: promise({}), create: promise({}) },
     userWorkflow: { findMany: promise([]), upsert: promise({}), create: promise({}) },
     userChecklistItem: { findMany: promise([]), upsert: promise({}) },
