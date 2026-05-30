@@ -29,7 +29,7 @@ function createMockPrisma() {
       },
     },
     user: { findUnique: promise(null), create: promise({}) },
-    profile: { findUnique: promise(null), upsert: promise({}) },
+    profile: { findUnique: promise(null), upsert: promise({}), create: promise({}) },
     userWorkflow: { findMany: promise([]), upsert: promise({}), create: promise({}) },
     userChecklistItem: { findMany: promise([]), upsert: promise({}) },
     reminder: { findMany: promise([]), create: promise({}), update: promise({}) },
