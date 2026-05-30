@@ -29,27 +29,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const email = credentials.email as string;
         const password = credentials.password as string;
 
-        // Fetch user from the database
         const user = await prisma.user.findUnique({
           where: { email },
         });
 
-        if (!user || !user.passwordHash) {
-          return null;
+        if (user && user.passwordHash) {
+          const isValid = await bcrypt.compare(password, user.passwordHash);
+          if (!isValid) return null;
+          return { id: user.id, name: user.name, email: user.email, role: user.role };
         }
 
-        // Compare password hashes using bcryptjs
-        const isValid = await bcrypt.compare(password, user.passwordHash);
-        if (!isValid) {
-          return null;
+        // Demo mode: accept any email with password "demo1234" when no real DB is configured
+        if (!process.env.DATABASE_URL) {
+          const isValid = await bcrypt.compare(password, "$2b$12$4yzbToVcnN/XdTPfOTUA1uuvhIHObaJPgi/RV4GjcHEH104Cy9LMq");
+          if (isValid) {
+            return { id: "demo-user-id", name: email.split("@")[0], email, role: "user" };
+          }
         }
 
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        };
+        return null;
       },
     }),
   ],
