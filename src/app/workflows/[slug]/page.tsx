@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Logo } from "@/components/ui/logo";
 import { Alert } from "@/components/ui/alert";
 import { SourceBlock } from "@/components/ui/source-block";
 import { DisclaimerBlock } from "@/components/ui/disclaimer-block";
@@ -64,7 +65,7 @@ export default function PublicWorkflowDetailPage() {
       <div className="flex-grow bg-background min-h-full">
         <header className="border-b border-border bg-surface h-16 flex items-center">
           <div className="max-w-content w-full mx-auto px-4">
-            <Link href="/" className="font-semibold text-text-primary text-lg"><span className="text-accent">Büro</span>Assist</Link>
+            <Logo href="/" />
           </div>
         </header>
         <main className="max-w-narrow mx-auto px-4 py-12 flex flex-col space-y-6">
@@ -81,7 +82,7 @@ export default function PublicWorkflowDetailPage() {
       <div className="flex-grow bg-background min-h-full">
         <header className="border-b border-border bg-surface h-16 flex items-center">
           <div className="max-w-content w-full mx-auto px-4 flex items-center justify-between">
-            <Link href="/" className="font-semibold text-text-primary text-lg"><span className="text-accent">Büro</span>Assist</Link>
+            <Logo href="/" />
             <Link href="/sign-in"><Button variant="secondary" className="min-h-[38px] px-4 py-1.5 text-xs">Sign In</Button></Link>
           </div>
         </header>
@@ -98,9 +99,7 @@ export default function PublicWorkflowDetailPage() {
     <div className="flex-grow bg-background min-h-full flex flex-col justify-between">
       <header className="border-b border-border bg-surface h-16 flex items-center">
         <div className="max-w-content w-full mx-auto px-4 flex items-center justify-between">
-          <Link href="/" className="font-semibold text-text-primary text-lg">
-            <span className="text-accent">Büro</span>Assist
-          </Link>
+          <Logo href="/" />
           <Link href="/sign-in">
             <Button variant="secondary" className="min-h-[38px] px-4 py-1.5 text-xs">
               Go to Dashboard

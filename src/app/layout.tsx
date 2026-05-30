@@ -11,6 +11,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "BüroAssist — Your calm guide through German bureaucracy",
   description: "A minimal, scannable guide and roadmap planner to help expats navigate Anmeldung, residence permits, tax registration, health insurance, and banking in Germany.",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({

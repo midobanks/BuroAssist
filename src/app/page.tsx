@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 import { Button } from "@/components/ui/button";
 import { DisclaimerBlock } from "@/components/ui/disclaimer-block";
 import { Badge } from "@/components/ui/badge";
+import { Logo } from "@/components/ui/logo";
 import { Smartphone, Landmark, HeartHandshake, House, Shield, FileText, CheckCircle, Clock, Bell, Sparkles, ArrowRight, User, MapPin, Route, ListChecks, Calendar } from "lucide-react";
 
 function FlowArrow() {
@@ -221,10 +222,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="border-b border-border bg-surface/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-content mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="font-semibold text-text-primary text-lg flex items-center gap-1.5">
-            <span className="text-accent text-xl">Büro</span>
-            <span className="font-normal text-text-secondary">Assist</span>
-          </Link>
+          <Logo href="/" />
           <div className="flex items-center gap-2">
             <Link href="/sign-in">
               <Button variant="tertiary" className="min-h-[38px] px-4 py-1.5 text-xs">

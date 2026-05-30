@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert } from "@/components/ui/alert";
+import { Logo } from "@/components/ui/logo";
 import { Book, Search, ArrowLeft } from "lucide-react";
 
 interface GlossaryTerm {
@@ -43,10 +44,7 @@ export default function GlossaryPage() {
     <div className="flex-grow bg-background min-h-full flex flex-col justify-between">
       <header className="border-b border-border bg-surface sticky top-0 z-50">
         <div className="max-w-content mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="font-semibold text-text-primary text-lg flex items-center gap-1.5">
-            <span className="text-accent text-xl">Büro</span>
-            <span className="font-normal text-text-secondary">Assist</span>
-          </Link>
+          <Logo href="/" />
           <Link href="/sign-in">
             <Button variant="secondary" className="min-h-[38px] px-4 py-1.5 text-xs">
               Go to Dashboard

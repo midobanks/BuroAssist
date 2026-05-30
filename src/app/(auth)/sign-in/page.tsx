@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { DisclaimerBlock } from "@/components/ui/disclaimer-block";
+import { Logo } from "@/components/ui/logo";
 import { Eye, EyeOff } from "lucide-react";
 
 function SignInForm() {
@@ -160,10 +161,9 @@ export default function SignInPage() {
   return (
     <div className="flex-1 bg-background min-h-full flex items-center justify-center py-16 px-4">
       <div className="w-full max-w-[420px] flex flex-col space-y-6">
-        <Link href="/" className="text-center font-bold text-xl flex items-center justify-center gap-1.5 pb-2">
-          <span className="text-accent">Büro</span>
-          <span className="font-normal text-text-secondary">Assist</span>
-        </Link>
+        <div className="flex justify-center pb-2">
+          <Logo href="/" size="md" />
+        </div>
 
         <React.Suspense fallback={<div className="text-center text-sm text-text-muted py-8">Loading...</div>}>
           <SignInForm />

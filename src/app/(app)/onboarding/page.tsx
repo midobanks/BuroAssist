@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Alert } from "@/components/ui/alert";
 import { DisclaimerBlock } from "@/components/ui/disclaimer-block";
+import { Logo } from "@/components/ui/logo";
 import { CheckCircle2 } from "lucide-react";
 
 interface WorkflowPreview {
@@ -98,7 +99,7 @@ export default function OnboardingPage() {
       <div className="flex-1 bg-background min-h-full flex flex-col justify-center items-center py-12 px-4">
         <div className="w-full max-w-[500px] flex flex-col space-y-6">
           <div className="text-center">
-            <span className="font-semibold text-accent text-lg">Büro<span className="font-normal text-text-secondary">Assist</span></span>
+            <Logo size="sm" />
             <h1 className="text-xl font-bold text-text-primary mt-1">Your Roadmap is Ready</h1>
           </div>
 
@@ -140,7 +141,7 @@ export default function OnboardingPage() {
     <div className="flex-1 bg-background min-h-full flex flex-col justify-center items-center py-12 px-4">
       <div className="w-full max-w-[500px] flex flex-col space-y-6">
         <div className="text-center">
-          <span className="font-semibold text-accent text-lg">Büro<span className="font-normal text-text-secondary">Assist</span></span>
+          <Logo size="sm" />
           <h1 className="text-xl font-bold text-text-primary mt-1">Set Up Your Expat Profile</h1>
         </div>
 

@@ -2,6 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/logo";
 import { ArrowLeft } from "lucide-react";
 
 export default function AboutPage() {
@@ -9,9 +10,7 @@ export default function AboutPage() {
     <div className="flex-grow bg-background min-h-full flex flex-col justify-between">
       <header className="border-b border-border bg-surface h-16 flex items-center">
         <div className="max-w-content w-full mx-auto px-4 flex items-center justify-between">
-          <Link href="/" className="font-semibold text-text-primary text-lg">
-            <span className="text-accent">Büro</span>Assist
-          </Link>
+          <Logo href="/" />
           <Link href="/">
             <Button variant="secondary" className="min-h-[38px] px-4 py-1.5 text-xs">
               Home

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { LayoutDashboard, Compass, ClipboardList, Bell, User, LogOut } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -30,10 +31,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex flex-col w-64 bg-surface border-r border-border shrink-0 justify-between">
         <div className="flex flex-col py-6">
           <div className="px-6 pb-6 border-b border-border/60">
-            <Link href="/dashboard" className="font-bold text-text-primary text-lg flex items-center gap-1.5">
-              <span className="text-accent">Büro</span>
-              <span className="font-normal text-text-secondary">Assist</span>
-            </Link>
+            <Logo href="/dashboard" />
           </div>
           <nav className="mt-6 px-4 flex flex-col space-y-1">
             {navItems.map((item) => (
@@ -70,10 +68,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Header for Mobile / Tablet */}
         <header className="md:hidden border-b border-border bg-surface sticky top-0 z-40">
           <div className="px-4 h-14 flex items-center justify-between">
-            <Link href="/dashboard" className="font-bold text-text-primary text-base flex items-center gap-1">
-              <span className="text-accent">Büro</span>
-              <span className="font-normal text-text-secondary">Assist</span>
-            </Link>
+            <Logo href="/dashboard" />
             <div className="h-7 w-7 rounded-full bg-accent-soft text-accent text-xs font-bold flex items-center justify-center">
               U
             </div>
